@@ -13,7 +13,6 @@ namespace Models.Database.Seed
                     serviceProvider.GetRequiredService<
                         DbContextOptions<CompanyContext>>()))
             {
-                // Look for any movies.
                 if (context.Employees.Any())
                 {
                     Console.WriteLine("No seed added");
