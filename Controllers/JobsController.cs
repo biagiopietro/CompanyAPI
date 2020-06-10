@@ -44,64 +44,76 @@ namespace CompanyAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<JobRequest>> GetItem(int id)
+        public async Task<ActionResult<JobResponse>> GetItem(long id)
         {
-            var todoItem = await _dbContext.Jobs.FindAsync(id);
-            if (todoItem == null)
+            var job = await _dbContext.Jobs.FindAsync(id);
+            if (job == null)
             {
                 return NotFound();
             }
 
-            return Ok(ConvertJobToJobResponse(todoItem));
+            return Ok(ConvertJobToJobResponse(job));
         }
 
         [HttpPost]
-        public async Task<ActionResult<JobRequest>> Post(Job job)
+        public async Task<ActionResult<JobRequest>> Post(JobRequest jobRequest)
         {
-            _dbContext.Jobs.Add(job);
-            await _dbContext.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetItem), new { id = job.Id }, ConvertJobToJobResponse(job));
+            if (!JobExists(jobRequest.Name))
+            {
+                var job = ConvertJobRequestToJob(jobRequest);
+                _dbContext.Jobs.Add(job);
+                await _dbContext.SaveChangesAsync();
+                return CreatedAtAction(nameof(GetItem), new { id = job.Id }, ConvertJobToJobResponse(job));
+            }
+            return new ConflictObjectResult(new { message = $"Already exists a job with name {jobRequest.Name}" });
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTodoItem(int id, Job job)
+        public async Task<IActionResult> Put(long id, JobRequest jobRequest)
         {
+            var job = ConvertJobRequestToJob(jobRequest);
             if (id != job.Id)
             {
                 return BadRequest();
             }
-            _dbContext.Entry(job).State = EntityState.Modified;
-
-            try
+            if (!JobExists(jobRequest.Name))
             {
-                await _dbContext.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!JobExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                _dbContext.Entry(job).State = EntityState.Modified;
 
-            return NoContent();
+                try
+                {
+                    await _dbContext.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!JobExists(id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return NoContent();
+            }
+            else
+            {
+                return new ConflictObjectResult(new { message = $"Cannot update the requested resource because already exists a job with name '{jobRequest.Name}'" });
+            }
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTodoItem(int id)
+        public async Task<IActionResult> Delete(long id)
         {
-            var todoItem = await _dbContext.Jobs.FindAsync(id);
+            var job = await _dbContext.Jobs.FindAsync(id);
 
-            if (todoItem == null)
+            if (job == null)
             {
                 return NotFound();
             }
 
-            _dbContext.Jobs.Remove(todoItem);
+            _dbContext.Jobs.Remove(job);
             await _dbContext.SaveChangesAsync();
 
             return NoContent();
@@ -119,10 +131,15 @@ namespace CompanyAPI.Controllers
             return jobs.ToPagedList(page, pageSize);
 
         }
-        private bool JobExists(int id)
+        private bool JobExists(long id)
         {
             return _dbContext.Jobs.FindAsync(id) != null;
         }
+        private bool JobExists(string name)
+        {
+            return _dbContext.Jobs.Where(x => x.Name == name).Count() > 0;
+        }
+
         private static IEnumerable<JobResponse> buildResponse(Job[] jobs)
         {
             foreach (var job in jobs)
@@ -130,9 +147,21 @@ namespace CompanyAPI.Controllers
                 yield return ConvertJobToJobResponse(job);
             }
         }
-        public static JobResponse ConvertJobToJobResponse(Job job)
+        private static JobResponse ConvertJobToJobResponse(Job job)
         {
-            return new JobResponse(job.Id, job.Name);
+            return new JobResponse
+            {
+                Id = job.Id,
+                Name = job.Name
+            };
+        }
+        private static Job ConvertJobRequestToJob(JobRequest jobRequest)
+        {
+            return new Job
+            {
+                Id = jobRequest.Id,
+                Name = jobRequest.Name
+            };
         }
     }
 }
