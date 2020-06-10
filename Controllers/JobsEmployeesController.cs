@@ -32,17 +32,26 @@ namespace CompanyAPI.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get([FromQuery(Name = "page")] int page, int employeeId)
+        public IActionResult Get([FromQuery(Name = "page")] int page, long employeeId)
         {
+            if (_dbContext.Employees.Find(employeeId) == null)
+            {
+                return NotFound();
+            }
             var jobEmployees = _dbContext.JobEmployees
             .Include(x => x.Job)
-            .Include(x => x.Employee);
-            var jobs = GetJobsFromEmployeeId(jobEmployees, employeeId);
-            if (jobs.Count() <= 0)
+            .Include(x => x.Employee)
+            .Where(x => x.Employee.Id == employeeId);
+            if (jobEmployees.Count() <= 0)
             {
                 return NoContent();
             }
-            return Ok(jobs);
+            var paginatedJobEmployee = paginateResults(page, jobEmployees);
+            if (paginatedJobEmployee.Count() == 0)
+            {
+                return NoContent();
+            }
+            return Ok(buildResponse(paginatedJobEmployee.ToArray()));
         }
 
         [HttpPost]
