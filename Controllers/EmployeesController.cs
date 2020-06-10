@@ -45,7 +45,7 @@ namespace CompanyAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<EmployeeRequest>> GetItem(int id)
+        public async Task<ActionResult<EmployeeResponse>> GetItem(long id)
         {
             var todoItem = await _dbContext.Employees.FindAsync(id);
             if (todoItem == null)
@@ -57,22 +57,23 @@ namespace CompanyAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<EmployeeRequest>> Post(Employee employee)
+        public async Task<ActionResult<EmployeeResponse>> Post(EmployeeRequest employeeRequest)
         {
+            var employee = ConvertEmployeeRequestToEmployee(employeeRequest);
             _dbContext.Employees.Add(employee);
             await _dbContext.SaveChangesAsync();
             return CreatedAtAction(nameof(GetItem), new { id = employee.Id }, ConvertEmployeeToEmployeeResponse(employee));
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTodoItem(int id, Employee employee)
+        public async Task<IActionResult> Put(long id, EmployeeRequest employeeRequest)
         {
-            if (id != employee.Id)
+            if (id != employeeRequest.Id)
             {
                 return BadRequest();
             }
+            var employee = ConvertEmployeeRequestToEmployee(employeeRequest);
             _dbContext.Entry(employee).State = EntityState.Modified;
-
             try
             {
                 await _dbContext.SaveChangesAsync();
@@ -93,7 +94,7 @@ namespace CompanyAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTodoItem(int id)
+        public async Task<IActionResult> Delete(long id)
         {
             var todoItem = await _dbContext.Employees.FindAsync(id);
 
@@ -120,7 +121,7 @@ namespace CompanyAPI.Controllers
             return employees.ToPagedList(page, pageSize);
 
         }
-        private bool EmployeeExists(int id)
+        private bool EmployeeExists(long id)
         {
             return _dbContext.Employees.FindAsync(id) != null;
         }
@@ -133,14 +134,25 @@ namespace CompanyAPI.Controllers
             }
         }
 
+        private static Employee ConvertEmployeeRequestToEmployee(EmployeeRequest employeeRequest)
+        {
+            return new Employee
+            {
+                Id = employeeRequest.Id,
+                Name = employeeRequest.Name,
+                Surname = employeeRequest.Surname,
+                Gender = (employeeRequest.Gender == "Male") ? Gender.Male : Gender.Female,
+                Age = employeeRequest.Age
+            };
+        }        
         private static EmployeeResponse ConvertEmployeeToEmployeeResponse(Employee employee)
         {
             return new EmployeeResponse(employee.Id,
-                                                  employee.Name,
-                                                  employee.Surname,
-                                                  employee.FullName,
-                                                  employee.Age,
-                                                  employee.Gender.ToString());
+                                        employee.Name,
+                                        employee.Surname,
+                                        employee.FullName,
+                                        employee.Age,
+                                        employee.Gender.ToString());
 
         }
     }
