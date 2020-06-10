@@ -1,22 +1,19 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace Requests
 {
     public class EmployeeRequest
     {
-        public EmployeeRequest(long id, string name, string surname, int age, string gender)
-        {
-            Id = id;
-            Name = name;
-            Surname = surname;
-            Age = age;
-            Gender = gender;
-        }
-
+        [Required]
         public long Id { get; set; }
+        [Required]
         public int Age {get; set;}
+        [Required]
         public string Gender {get; set;}
+        [Required]
         public string Surname {get; set;}
+        [Required]
         public string Name {get; set;}
     }
 }
