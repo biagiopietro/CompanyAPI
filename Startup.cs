@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -13,6 +14,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Models;
+using Services;
 
 namespace CompanyAPI
 {
@@ -32,6 +34,9 @@ namespace CompanyAPI
             // Setup the database connection
             services.AddDbContext<CompanyContext>(options =>
                 options.UseMySql(Configuration.GetConnectionString("CompanyDB")));
+
+            services.AddTransient<IJobService, JobService>();
+            
             // Setup the swagger generator
             services.AddSwaggerGen(context =>
                 {
@@ -39,7 +44,12 @@ namespace CompanyAPI
                     {
                         Version = "v1",
                         Title = "Company API",
-                        Description = "My First ASP.NET Core Web API"
+                        Description = "My First ASP.NET Core Web API",
+                        Contact = new OpenApiContact
+                        {
+                            Name = "Biagio Pietro Capece",
+                            Email = "biagiopietro.capece@student.unife.it"
+                        },
                     });
                 });
         }
@@ -59,12 +69,12 @@ namespace CompanyAPI
             app.UseAuthorization();
 
             app.UseSwagger();
-            
+
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });
-            
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

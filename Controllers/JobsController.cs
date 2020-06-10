@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -17,20 +18,22 @@ namespace CompanyAPI.Controllers
     {
         private static readonly int NUM_OF_RESULT_PER_PAGE = 5;
 
-        private CompanyContext _dbContext;
+
+        private IJobService _service;
+
         private readonly ILogger<JobsController> _logger;
 
         public JobsController(ILogger<JobsController> logger,
-                                    CompanyContext context)
+                                    IJobService service)
         {
             _logger = logger;
-            _dbContext = context;
+            _service = service;
         }
 
         [HttpGet]
         public IActionResult Get([FromQuery(Name = "page")] int page)
         {
-            var jobs = _dbContext.Jobs.ToArray();
+            var jobs = _service.All().ToArray();
             if (jobs.Count() == 0)
             {
                 return NoContent();
@@ -46,7 +49,7 @@ namespace CompanyAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<JobResponse>> GetItem(long id)
         {
-            var job = await _dbContext.Jobs.FindAsync(id);
+            var job = _service.Find(id);
             if (job == null)
             {
                 return NotFound();
@@ -61,8 +64,7 @@ namespace CompanyAPI.Controllers
             if (!JobExists(jobRequest.Name))
             {
                 var job = ConvertJobRequestToJob(jobRequest);
-                _dbContext.Jobs.Add(job);
-                await _dbContext.SaveChangesAsync();
+                await _service.AddAsync(job);
                 return CreatedAtAction(nameof(GetItem), new { id = job.Id }, ConvertJobToJobResponse(job));
             }
             return new ConflictObjectResult(new { message = $"Already exists a job with name {jobRequest.Name}" });
@@ -78,11 +80,9 @@ namespace CompanyAPI.Controllers
             }
             if (!JobExists(jobRequest.Name))
             {
-                _dbContext.Entry(job).State = EntityState.Modified;
-
                 try
                 {
-                    await _dbContext.SaveChangesAsync();
+                    await _service.UpdateAsync(job);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -106,16 +106,12 @@ namespace CompanyAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(long id)
         {
-            var job = await _dbContext.Jobs.FindAsync(id);
-
+            var job = _service.Find(id);
             if (job == null)
             {
                 return NotFound();
             }
-
-            _dbContext.Jobs.Remove(job);
-            await _dbContext.SaveChangesAsync();
-
+            await _service.RemoveAsync(job);
             return NoContent();
         }
         private static IEnumerable<Job> paginateResults(int page, IEnumerable<Job> jobs)
@@ -133,11 +129,11 @@ namespace CompanyAPI.Controllers
         }
         private bool JobExists(long id)
         {
-            return _dbContext.Jobs.FindAsync(id) != null;
+            return _service.FindAsync(id) != null;
         }
         private bool JobExists(string name)
         {
-            return _dbContext.Jobs.Where(x => x.Name == name).Count() > 0;
+            return _service.FindAsync(name) != null;
         }
 
         private static IEnumerable<JobResponse> buildResponse(Job[] jobs)
