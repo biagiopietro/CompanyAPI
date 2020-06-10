@@ -31,7 +31,7 @@ namespace CompanyAPI
             services.AddControllers();
             // Setup the database connection
             services.AddDbContext<CompanyContext>(options =>
-                options.UseMySql(Configuration.GetConnectionString("EmployeeContextDocker")));
+                options.UseMySql(Configuration.GetConnectionString("CompanyDB")));
             // Setup the swagger generator
             services.AddSwaggerGen(context =>
                 {
