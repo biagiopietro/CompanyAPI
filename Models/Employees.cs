@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Models
 {
-    public enum Gender 
+    public enum Gender
     {
         Male = 'M',
         Female = 'F'
@@ -13,14 +13,19 @@ namespace Models
         [Key]
         public long Id { get; set; }
         [Required]
-        public int Age {get; set;}
+        public int Age { get; set; }
         [Required]
-        public Gender Gender {get; set;}
+        public Gender Gender { get; set; }
         [Required]
-        public string Surname {get; set;}
+        [MaxLength(150)]
+        public string Surname { get; set; }
         [Required]
-        public string Name {get; set;}
-        public string FullName 
+        [MaxLength(150)]
+        public string Name { get; set; }
+        [Required]
+        [MaxLength(150)]
+        public string SerialNumber { get; set; }
+        public string FullName
         {
             get => Surname + " " + Name;
         }

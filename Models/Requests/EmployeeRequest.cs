@@ -8,12 +8,17 @@ namespace Requests
         [Required]
         public long Id { get; set; }
         [Required]
-        public int Age {get; set;}
+        [MaxLength(10)]
+        public string SerialNumber { get; set; }
         [Required]
-        public string Gender {get; set;}
+        public int Age { get; set; }
         [Required]
-        public string Surname {get; set;}
+        public string Gender { get; set; }
         [Required]
-        public string Name {get; set;}
+        [MaxLength(150)]
+        public string Surname { get; set; }
+        [Required]
+        [MaxLength(150)]
+        public string Name { get; set; }
     }
 }

@@ -36,6 +36,7 @@ namespace CompanyAPI
                 options.UseMySql(Configuration.GetConnectionString("CompanyDB")));
 
             services.AddTransient<IJobService, JobService>();
+            services.AddTransient<IEmployeeService, EmployeeService>();
             
             // Setup the swagger generator
             services.AddSwaggerGen(context =>

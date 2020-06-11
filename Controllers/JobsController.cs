@@ -73,11 +73,11 @@ namespace CompanyAPI.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(long id, JobRequest jobRequest)
         {
-            var job = ConvertJobRequestToJob(jobRequest);
-            if (id != job.Id)
+            if (id != jobRequest.Id)
             {
                 return BadRequest();
             }
+            var job = ConvertJobRequestToJob(jobRequest);
             if (!JobExists(jobRequest.Name))
             {
                 try
@@ -133,7 +133,9 @@ namespace CompanyAPI.Controllers
         }
         private bool JobExists(string name)
         {
-            return _service.FindAsync(name) != null;
+            var job = _service.FindByNameOrDefault(name);
+            
+            return (object.Equals(job, default (Job)))?  false : true;
         }
 
         private static IEnumerable<JobResponse> buildResponse(Job[] jobs)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -16,22 +17,22 @@ namespace CompanyAPI.Controllers
     [Route("api/[controller]")]
     public class EmployeesController : ControllerBase
     {
-        private static readonly int NUM_OF_RESULT_PER_PAGE = 5;
+        public static readonly int NUM_OF_RESULT_PER_PAGE = 5;
 
-        private CompanyContext _dbContext;
+        private IEmployeeService _service;
         private readonly ILogger<EmployeesController> _logger;
 
         public EmployeesController(ILogger<EmployeesController> logger,
-                                    CompanyContext context)
+                                    IEmployeeService service)
         {
             _logger = logger;
-            _dbContext = context;
+            _service = service;
         }
 
         [HttpGet]
-        public IActionResult Get([FromQuery(Name = "page")] int page)
+        public ActionResult<EmployeeResponse> Get([FromQuery(Name = "page")] int page)
         {
-            var employees = _dbContext.Employees.ToArray();
+            var employees = _service.All().ToArray();
             if (employees.Count() == 0)
             {
                 return NoContent();
@@ -45,24 +46,27 @@ namespace CompanyAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<EmployeeResponse>> GetItem(long id)
+        public ActionResult<EmployeeResponse> GetItem(long id)
         {
-            var todoItem = await _dbContext.Employees.FindAsync(id);
-            if (todoItem == null)
+            var employee = _service.Find(id);
+            if (employee == null)
             {
                 return NotFound();
             }
 
-            return Ok(ConvertEmployeeToEmployeeResponse(todoItem));
+            return Ok(ConvertEmployeeToEmployeeResponse(employee));
         }
 
         [HttpPost]
         public async Task<ActionResult<EmployeeResponse>> Post(EmployeeRequest employeeRequest)
         {
-            var employee = ConvertEmployeeRequestToEmployee(employeeRequest);
-            _dbContext.Employees.Add(employee);
-            await _dbContext.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetItem), new { id = employee.Id }, ConvertEmployeeToEmployeeResponse(employee));
+            if (!EmployeeExists(employeeRequest.SerialNumber))
+            {
+                var employee = ConvertEmployeeRequestToEmployee(employeeRequest);
+                await _service.AddAsync(employee);
+                return CreatedAtAction(nameof(GetItem), new { id = employee.Id }, ConvertEmployeeToEmployeeResponse(employee));
+            }
+            return new ConflictObjectResult(new { message = $"Already exists a job with this serial number {employeeRequest.SerialNumber}" });
         }
 
         [HttpPut("{id}")]
@@ -73,39 +77,41 @@ namespace CompanyAPI.Controllers
                 return BadRequest();
             }
             var employee = ConvertEmployeeRequestToEmployee(employeeRequest);
-            _dbContext.Entry(employee).State = EntityState.Modified;
-            try
+            if (!EmployeeExists(employee.SerialNumber))
             {
-                await _dbContext.SaveChangesAsync();
+                try
+                {
+                    await _service.UpdateAsync(employee);
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!EmployeeExists(id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return NoContent();
             }
-            catch (DbUpdateConcurrencyException)
+            else
             {
-                if (!EmployeeExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return new ConflictObjectResult(new { message = $"Cannot update the requested resource because already exists the same employee." });
             }
-
-            return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(long id)
         {
-            var todoItem = await _dbContext.Employees.FindAsync(id);
+            var employee = _service.Find(id);
 
-            if (todoItem == null)
+            if (employee == null)
             {
                 return NotFound();
             }
-
-            _dbContext.Employees.Remove(todoItem);
-            await _dbContext.SaveChangesAsync();
-
+            await _service.RemoveAsync(employee);
             return NoContent();
         }
         private static IEnumerable<Employee> paginateResults(int page, IEnumerable<Employee> employees)
@@ -123,7 +129,12 @@ namespace CompanyAPI.Controllers
         }
         private bool EmployeeExists(long id)
         {
-            return _dbContext.Employees.FindAsync(id) != null;
+            return _service.FindAsync(id) != null;
+        }
+        private bool EmployeeExists(string serialNumber)
+        {
+            var employee = _service.FindBySerialNumberOrDefault(serialNumber);
+            return (object.Equals(employee, default (Employee)))?  false : true;
         }
 
         private static IEnumerable<EmployeeResponse> buildResponse(Employee[] employees)
@@ -142,18 +153,22 @@ namespace CompanyAPI.Controllers
                 Name = employeeRequest.Name,
                 Surname = employeeRequest.Surname,
                 Gender = (employeeRequest.Gender == "Male") ? Gender.Male : Gender.Female,
-                Age = employeeRequest.Age
+                Age = employeeRequest.Age,
+                SerialNumber = employeeRequest.SerialNumber
             };
-        }        
+        }
         private static EmployeeResponse ConvertEmployeeToEmployeeResponse(Employee employee)
         {
-            return new EmployeeResponse(employee.Id,
-                                        employee.Name,
-                                        employee.Surname,
-                                        employee.FullName,
-                                        employee.Age,
-                                        employee.Gender.ToString());
-
+            return new EmployeeResponse
+            {
+                Id = employee.Id,
+                Name = employee.Name,
+                Surname = employee.Surname,
+                FullName = employee.FullName,
+                Age = employee.Age,
+                SerialNumber = employee.SerialNumber,
+                Gender = employee.Gender.ToString()
+            };
         }
     }
 }

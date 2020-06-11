@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -42,9 +43,9 @@ namespace Services
             await _dbContext.Jobs.FindAsync(id);
         }
 
-        public async Task FindAsync(string name)
+        public Job FindByNameOrDefault(string name)
         {
-            await _dbContext.Jobs.FirstOrDefaultAsync(x => x.Name == name);
+           return _dbContext.Jobs.SingleOrDefault(x => x.Name.ToLower().Equals(name.ToLower()));
         }
 
         public async Task RemoveAsync(Job job)

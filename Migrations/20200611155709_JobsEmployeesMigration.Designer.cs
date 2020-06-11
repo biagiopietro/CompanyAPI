@@ -9,14 +9,14 @@ using Models;
 namespace CompanyAPI.Migrations
 {
     [DbContext(typeof(CompanyContext))]
-    [Migration("20200610102012_JobsEmployeesMigrations")]
-    partial class JobsEmployeesMigrations
+    [Migration("20200611155709_JobsEmployeesMigration")]
+    partial class JobsEmployeesMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.4")
+                .HasAnnotation("ProductVersion", "3.1.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("Model.JobEmployee", b =>
@@ -63,11 +63,18 @@ namespace CompanyAPI.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(150) CHARACTER SET utf8mb4")
+                        .HasMaxLength(150);
+
+                    b.Property<string>("SerialNumber")
+                        .IsRequired()
+                        .HasColumnType("varchar(150) CHARACTER SET utf8mb4")
+                        .HasMaxLength(150);
 
                     b.Property<string>("Surname")
                         .IsRequired()
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("varchar(150) CHARACTER SET utf8mb4")
+                        .HasMaxLength(150);
 
                     b.HasKey("Id");
 

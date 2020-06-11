@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace CompanyAPI.Migrations
 {
-    public partial class JobsEmployeesMigrations : Migration
+    public partial class JobsEmployeesMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -16,8 +16,9 @@ namespace CompanyAPI.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Age = table.Column<int>(nullable: false),
                     Gender = table.Column<int>(nullable: false),
-                    Surname = table.Column<string>(nullable: false),
-                    Name = table.Column<string>(nullable: false)
+                    Surname = table.Column<string>(maxLength: 150, nullable: false),
+                    Name = table.Column<string>(maxLength: 150, nullable: false),
+                    SerialNumber = table.Column<string>(maxLength: 150, nullable: false)
                 },
                 constraints: table =>
                 {

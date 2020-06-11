@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Models;
 
@@ -10,7 +11,7 @@ namespace Interfaces
         Task FindAsync(long id);
         Job Find(long id);
         Job Find(string name);
-        Task FindAsync(string name);
+        Job FindByNameOrDefault(string name);
         Task AddAsync(Job job);
         Task UpdateAsync(Job job);
         Task RemoveAsync(Job job);

@@ -69,8 +69,8 @@ namespace Tests
             var logger = new Mock<ILogger<JobsController>>();
 
             var jobToAdd = buildJobRequest();
-            Task t = null;
-            service.Setup(x => x.FindAsync(jobToAdd.Name)).Returns(t);
+            Job jobNull = null;
+            service.Setup(x => x.FindByNameOrDefault(jobToAdd.Name)).Returns(jobNull);
             var controller = new JobsController(logger.Object, service.Object);
             var expectedResponse = buildJobResponse();
             //Act
@@ -93,8 +93,8 @@ namespace Tests
             var logger = new Mock<ILogger<JobsController>>();
 
             var jobToAdd = buildJobRequest();
-            Task t = Task.CompletedTask;
-            service.Setup(x => x.FindAsync(jobToAdd.Name)).Returns(t);
+            Job job = new Job();
+            service.Setup(x => x.FindByNameOrDefault(jobToAdd.Name)).Returns(job);
             var controller = new JobsController(logger.Object, service.Object);
             //Act
             var results = controller.Post(jobToAdd);
@@ -114,9 +114,10 @@ namespace Tests
             var logger = new Mock<ILogger<JobsController>>();
 
             var jobToPut = buildJobRequest();
-            Task t = Task.CompletedTask;
-            service.Setup(x => x.FindAsync(jobToPut.Name)).Returns(t);
-            service.Setup(x => x.UpdateAsync(It.Ref<Job>.IsAny)).Returns(t);
+            Job job = new Job();
+            Task completedTask = Task.CompletedTask;
+            service.Setup(x => x.FindByNameOrDefault(jobToPut.Name)).Returns(job);
+            service.Setup(x => x.UpdateAsync(It.Ref<Job>.IsAny)).Returns(completedTask);
             var controller = new JobsController(logger.Object, service.Object);
             //Act
             var results = controller.Put(jobToPut.Id, jobToPut);
@@ -136,8 +137,8 @@ namespace Tests
 
             var jobToPut = buildJobRequest();
             Task t = Task.CompletedTask;
-            Task taskNull = null;
-            service.Setup(x => x.FindAsync(jobToPut.Name)).Returns(taskNull);
+            Job jobNull = null;
+            service.Setup(x => x.FindByNameOrDefault(jobToPut.Name)).Returns(jobNull);
             service.Setup(x => x.UpdateAsync(It.Ref<Job>.IsAny)).Returns(t);
             var controller = new JobsController(logger.Object, service.Object);
             //Act
@@ -213,7 +214,7 @@ namespace Tests
 
         private IEnumerable<Job> GetFakeData()
         {
-            var persons = new List<Job>()
+            var jobs = new List<Job>()
             {
                  new Job { Name = "Engineer" },
                     new Job { Name = "Police man/woman" },
@@ -222,7 +223,7 @@ namespace Tests
                     new Job { Name = "Recruiter" },
                     new Job { Name = "Bus Driver" }
             };
-            return persons;
+            return jobs;
         }
 
         private JobRequest buildJobRequest()
