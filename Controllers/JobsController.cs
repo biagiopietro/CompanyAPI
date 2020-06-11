@@ -16,7 +16,7 @@ namespace CompanyAPI.Controllers
     [Route("api/[controller]")]
     public class JobsController : ControllerBase
     {
-        private static readonly int NUM_OF_RESULT_PER_PAGE = 5;
+        public static readonly int NUM_OF_RESULT_PER_PAGE = 5;
 
 
         private IJobService _service;
@@ -31,7 +31,7 @@ namespace CompanyAPI.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get([FromQuery(Name = "page")] int page)
+        public ActionResult<JobResponse> Get([FromQuery(Name = "page")] int page)
         {
             var jobs = _service.All().ToArray();
             if (jobs.Count() == 0)
@@ -47,7 +47,7 @@ namespace CompanyAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<JobResponse>> GetItem(long id)
+        public ActionResult<JobResponse> GetItem(long id)
         {
             var job = _service.Find(id);
             if (job == null)
@@ -59,7 +59,7 @@ namespace CompanyAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<JobRequest>> Post(JobRequest jobRequest)
+        public async Task<ActionResult<JobResponse>> Post(JobRequest jobRequest)
         {
             if (!JobExists(jobRequest.Name))
             {
