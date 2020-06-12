@@ -53,6 +53,7 @@ namespace CompanyAPI
                             Email = "biagiopietro.capece@student.unife.it"
                         },
                     });
+
                 });
         }
 
@@ -75,6 +76,8 @@ namespace CompanyAPI
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                // The instruction below shows the swagger page at the app's root; "http://<host>:<port>/"
+                c.RoutePrefix = string.Empty;
             });
 
             app.UseEndpoints(endpoints =>
