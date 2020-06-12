@@ -15,7 +15,7 @@ namespace Models.Database.Seed
             {
                 if (context.Employees.Any())
                 {
-                    Console.WriteLine("No seed added");
+                    Console.WriteLine("No Employee seeds added");
                     return;   // DB has been seeded
                 }
 

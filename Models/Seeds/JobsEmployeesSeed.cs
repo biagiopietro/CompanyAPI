@@ -15,10 +15,9 @@ namespace Models.Database.Seed
                     serviceProvider.GetRequiredService<
                         DbContextOptions<CompanyContext>>()))
             {
-                // Look for any movies.
                 if (context.JobEmployees.Any())
                 {
-                    Console.WriteLine("No seed added");
+                    Console.WriteLine("No JobEmployee seeds added");
                     return;   // DB has been seeded
                 }
 

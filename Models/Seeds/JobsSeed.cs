@@ -8,15 +8,14 @@ namespace Models.Database.Seed
     public static class JobSeed
     {
         public static void Initialize(IServiceProvider serviceProvider)
-        {
+        {   
             using (var context = new CompanyContext(
                     serviceProvider.GetRequiredService<
                         DbContextOptions<CompanyContext>>()))
             {
-                // Look for any movies.
                 if (context.Jobs.Any())
                 {
-                    Console.WriteLine("No seed added");
+                    Console.WriteLine("No Job seeds added");
                     return;   // DB has been seeded
                 }
 
