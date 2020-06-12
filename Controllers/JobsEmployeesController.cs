@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
@@ -21,27 +22,30 @@ namespace CompanyAPI.Controllers
     {
         private static readonly int NUM_OF_RESULT_PER_PAGE = 5;
 
-        private CompanyContext _dbContext;
+        private IJobService _jobService;
+        private IEmployeeService _employeeService;
+        private IJobEmployeeService _service;
         private readonly ILogger<JobsEmployeesController> _logger;
 
         public JobsEmployeesController(ILogger<JobsEmployeesController> logger,
-                                    CompanyContext context)
+                                    IJobService jobService,
+                                    IEmployeeService employeeService,
+                                    IJobEmployeeService service)
         {
             _logger = logger;
-            _dbContext = context;
+            _jobService = jobService;
+            _employeeService = employeeService;
+            _service = service;
         }
 
         [HttpGet]
         public IActionResult Get([FromQuery(Name = "page")] int page, long employeeId)
         {
-            if (_dbContext.Employees.Find(employeeId) == null)
+            if (_employeeService.Find(employeeId) == null)
             {
                 return NotFound();
             }
-            var jobEmployees = _dbContext.JobEmployees
-            .Include(x => x.Job)
-            .Include(x => x.Employee)
-            .Where(x => x.Employee.Id == employeeId);
+            var jobEmployees = _service.FindByEmployeeId(employeeId);
             if (jobEmployees.Count() <= 0)
             {
                 return NoContent();
@@ -55,20 +59,16 @@ namespace CompanyAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<JobEmployeeResponse>> Post(JobEmployeeRequest jobEmployeeRequest, int employeeId)
+        public async Task<ActionResult<JobEmployeeResponse>> Post(JobEmployeeRequest jobEmployeeRequest, long employeeId)
         {
             if (validateDataInPostRequest(jobEmployeeRequest))
             {
-                var jobEmployees = _dbContext.JobEmployees
-                .Include(x => x.Job)
-                .Include(x => x.Employee);
-                var jobsInProgress = GetInProgressJobsFromEmployeeId(jobEmployees, employeeId);
+                var jobsInProgress = _service.EmployeeInProgressJobs(employeeId);
                 bool jobAlreadyExists = jobsInProgress.Select(x => x).Where(x => x.Id == jobEmployeeRequest.JobId).Any();
                 if (!jobAlreadyExists)
                 {
                     var jobEmployee = ConvertJobEmployeeRequestToJobEmployee(jobEmployeeRequest, employeeId);
-                    _dbContext.JobEmployees.Add(jobEmployee);
-                    await _dbContext.SaveChangesAsync();
+                    await _service.AddAsync(jobEmployee);
                     return CreatedAtAction(nameof(Get), new { employeeId = jobEmployee.Employee.Id }, ConvertJobEmployeeToJobEmployeeResponse(jobEmployee));
                 }
                 else
@@ -83,13 +83,10 @@ namespace CompanyAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteItem([FromQuery(Name = "contractCod"), BindRequired] int contractCode, int id, int employeeId)
+        public async Task<IActionResult> DeleteItem([FromQuery(Name = "contractCode"), BindRequired] long contractCode, long id, long employeeId)
         {
-            var jobEmployee = await _dbContext.JobEmployees.
-            Include(x => x.Employee).
-            Include(x => x.Job).
-            SingleOrDefaultAsync(x => x.Id == contractCode);
-            if (jobEmployee == null)
+            var jobEmployee = _service.FindOrDefault(contractCode);
+            if (object.Equals(jobEmployee, default(JobEmployee)))
             {
                 return NotFound();
             }
@@ -101,8 +98,7 @@ namespace CompanyAPI.Controllers
             {
                 return new UnauthorizedObjectResult(new {message="The id specified in the url and the jobId of the requested resource are not the same."});
             }
-            _dbContext.JobEmployees.Remove(jobEmployee);
-            await _dbContext.SaveChangesAsync();
+            await _service.RemoveAsync(jobEmployee);
             return NoContent();
         }
 
@@ -139,9 +135,9 @@ namespace CompanyAPI.Controllers
             return jobEmployees.ToPagedList(page, pageSize);
 
         }
-        private bool EmployeeExists(int id)
+        private bool EmployeeExists(long id)
         {
-            return _dbContext.Employees.FindAsync(id) != null;
+            return _employeeService.FindAsync(id) != null;
         }
 
         private static IEnumerable<JobEmployeeResponse> buildResponse(JobEmployee[] jobEmployees)
@@ -163,11 +159,11 @@ namespace CompanyAPI.Controllers
 
         }
 
-        private JobEmployee ConvertJobEmployeeRequestToJobEmployee(JobEmployeeRequest jobEmployeeRequest, int employeeId)
+        private JobEmployee ConvertJobEmployeeRequestToJobEmployee(JobEmployeeRequest jobEmployeeRequest, long employeeId)
         {
             return new JobEmployee(0,
-                                    _dbContext.Employees.Find(employeeId),
-                                    _dbContext.Jobs.Find(jobEmployeeRequest.JobId),
+                                    _employeeService.Find(employeeId),
+                                    _jobService.Find(jobEmployeeRequest.JobId),
                                     jobEmployeeRequest.Start,
                                     jobEmployeeRequest.End,
                                     jobEmployeeRequest.MonthlySalaryGross);

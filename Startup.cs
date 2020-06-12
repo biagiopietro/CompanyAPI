@@ -37,6 +37,7 @@ namespace CompanyAPI
 
             services.AddTransient<IJobService, JobService>();
             services.AddTransient<IEmployeeService, EmployeeService>();
+            services.AddTransient<IJobEmployeeService, JobEmployeeService>();
             
             // Setup the swagger generator
             services.AddSwaggerGen(context =>
