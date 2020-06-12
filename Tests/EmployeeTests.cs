@@ -117,7 +117,7 @@ namespace Tests
             var employeeToPut = buildEmployeeRequest();
             Employee employee = new Employee();
             Task taskCompleted = Task.CompletedTask;
-            service.Setup(x => x.FindBySerialNumberOrDefault(employeeToPut.Name)).Returns(employee);
+            service.Setup(x => x.FindBySerialNumberOrDefault(employeeToPut.SerialNumber)).Returns(employee);
             service.Setup(x => x.UpdateAsync(It.Ref<Employee>.IsAny)).Returns(taskCompleted);
             var controller = new EmployeesController(logger.Object, service.Object);
             //Act
