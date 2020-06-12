@@ -1,5 +1,11 @@
 version: '3.3'
 services:
+    company-api:
+        container_name: company-api
+        image: company-api
+        restart: always
+        ports:
+            - '8080:80'
     mysql-net:
         container_name: mysql-net
         image: mysql:8

@@ -23,5 +23,10 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Moq" Version="4.14.1" />
+
+    <None Include="appsettings.json" CopyToPublishDirectory="Never" />
+    <None Include="appsettings.Development.json" CopyToPublishDirectory="Never" />
+    <None Include="appsettings.Test.json" CopyToPublishDirectory="Never" />
+    
   </ItemGroup>
 </Project>
