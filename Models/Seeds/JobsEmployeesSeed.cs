@@ -39,13 +39,15 @@ namespace Models.Database.Seed
                         Employee = employees[0],
                         Job = jobs[0],
                         Start = new DateTime(2012, 02, 13),
-                        End = new DateTime(2013, 12, 01)
+                        End = new DateTime(2013, 12, 01),
+                        MonthlySalaryGross = 1350
                     },
                     new JobEmployee
                     {
                         Employee = employees[0],
                         Job = jobs[1],
                         Start = new DateTime(2014, 07, 17),
+                        MonthlySalaryGross = 2100
                     }
                 );
                 context.SaveChanges();
