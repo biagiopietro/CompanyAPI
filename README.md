@@ -17,9 +17,9 @@ Table of Contents
 
 ## Company API
 
-This is a simple ```Company API``` application written using ```C#```. 
-These APIs allow you to *get*, *add*, *delete* and *update* employees and jobs. 
-This application demostrates how it's simple to create an easy ```CRUD``` microservice using ```C#```. 
+This is a simple ```Company API``` application written using ```C#```.
+These APIs allow you to *get*, *add*, *delete* and *update* employees and jobs.
+This application demostrates how it's simple to create an easy ```CRUD``` microservice using ```C#```.
 When the app starts up the a **swagger page** is shown and there you can test the APIs. (see [Demo](#demo) section)
 You can test the API exposed by the application using ```curl``` or ```Postman``` or whatever you want as well :)
 
@@ -33,13 +33,14 @@ As you can see the project contains these files:
 -   ```appsettings.Docker.json```;
 -   ```appsettings.Test.json```.
 
-Each of the above files contains the json attribute ```ConnectionStrings.CompanyDB``` and here you have to setup the **connection to you database**. 
-Each of ```appsettings.*.json``` (except ```appsettings.Docker.json```) as default contains a connection to the local ```mysql``` database. 
+Each of the above files contains the json attribute ```ConnectionStrings.CompanyDB``` and here you have to setup the **connection to you database**.
+Each of ```appsettings.*.json``` (except ```appsettings.Docker.json```) as default contains a connection to the local ```mysql``` database.
 Instead, the ```appsettings.Docker.json``` file contains the ```service name``` of the mysql container described into the ```docker-compose.yml``` (see [Docker-compose](#docker-compose) section).
 
 
 ## Seed
-On start up of the project, it will automatically create a database with the name specified by the ```ConnectionStrings.CompanyDB``` attribute and seed it. Obviously the system gets the right ```appsettings.*.json``` file based on this ```env``` variable's value: ```ASPNETCORE_ENVIRONMENT``` (you can find it in ```.vscode/launch.json``` file).
+On start up of the project, it will automatically create a database with the name specified by the ```ConnectionStrings.CompanyDB``` attribute and seed it
+Obviously the system gets the right ```appsettings.*.json``` file based on this ```env``` variable's value: ```ASPNETCORE_ENVIRONMENT``` (you can find it in ```.vscode/launch.json``` file).
 
 **Note**
 
