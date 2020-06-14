@@ -17,10 +17,10 @@ Table of Contents
 
 ## Company API
 
-This is a simple ```Company API``` application written using ```C#```. These APIs allow you to *get*, *add*, *delete* and *update* employees and jobs. This application demostrates how it's simple to create an easy ```CRUD``` microservices using ```C#```. 
-
-When the app starts up the a **swagger page** is shown and there you can test the APIs.
-
+This is a simple ```Company API``` application written using ```C#```. 
+These APIs allow you to *get*, *add*, *delete* and *update* employees and jobs. 
+This application demostrates how it's simple to create an easy ```CRUD``` microservice using ```C#```. 
+When the app starts up the a **swagger page** is shown and there you can test the APIs. (see [Demo](#demo) section)
 You can test the API exposed by the application using ```curl``` or ```Postman``` or whatever you want as well :)
 
 
@@ -33,11 +33,13 @@ As you can see the project contains these files:
 -   ```appsettings.Docker.json```;
 -   ```appsettings.Test.json```.
 
-Each of the above files contains the json attribute ```ConnectionStrings.CompanyDB``` and here you have to setup the connection to you database. Each of ```appsettings.*.json``` (except appsettings.Docker.json) as default contains a connection to the local ```mysql``` database. Instead, the ```appsettings.Docker.json``` file contains the ```service name``` of the mysql container described into the ```docker-compose.yml``` (see [Docker-compose](#docker-compose) section).
+Each of the above files contains the json attribute ```ConnectionStrings.CompanyDB``` and here you have to setup the **connection to you database**. 
+Each of ```appsettings.*.json``` (except ```appsettings.Docker.json```) as default contains a connection to the local ```mysql``` database. 
+Instead, the ```appsettings.Docker.json``` file contains the ```service name``` of the mysql container described into the ```docker-compose.yml``` (see [Docker-compose](#docker-compose) section).
 
 
 ## Seed
-On start up of the project, it will automatically create a database with the name specified by the ```ConnectionStrings.CompanyDB``` attribute and seed it. Obviously the system gets the right appsettings.*.json file based on this ```env``` variable: ```ASPNETCORE_ENVIRONMENT``` (you can find it in ```.vscode/launch.json``` file).
+On start up of the project, it will automatically create a database with the name specified by the ```ConnectionStrings.CompanyDB``` attribute and seed it. Obviously the system gets the right ```appsettings.*.json``` file based on this ```env``` variable's value: ```ASPNETCORE_ENVIRONMENT``` (you can find it in ```.vscode/launch.json``` file).
 
 **Note**
 
@@ -48,7 +50,7 @@ If you want to change the seeds please refer to the ```Seeds/``` folder.
 
 ### XUnit tests
 
-To be sure that the project work after every change that you make, please run the xunit tests. 
+To be sure that the project works after every change that you make, please run the ```xunit``` tests. 
 
 So if you use ```Visual Studio Code``` I suggest to you to install the **.NET COre Test Explorer by Jun Han** extentions because it gives to you a useful UI where you can see and run the tests.
 
@@ -73,7 +75,11 @@ Finally you can run:
 ```
 docker build -t company-api
 ```
-to generate the docker image.
+to generate the docker image and: 
+```
+docker run -t company-api company-api --network=host -p8080:80
+```
+to run the application.
 
 ## Docker-compose
 You can run ```Company-API + MySQL``` using ```docker-compose```.
