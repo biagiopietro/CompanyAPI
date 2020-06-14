@@ -64,7 +64,7 @@ I provided a ```Dockerfile``` to allow you to build your own docker image as wel
 Before to build the application, you have to 'publish' your app so you have to run this command:
 
 ```
-dotnet publish-c Release
+dotnet publish -c Release
 ```
 
 In this way the system generates the binaries under the ```bin/Release``` folder.
@@ -84,7 +84,7 @@ So move inside the Company-API folder and run ```docker-compose up -d``` and see
 
 ## Demo
 
-![](https://imgur.com/a/XexnTNp.gif)
+![](https://imgur.com/XexnTNp)
 
 
 ## License
