@@ -84,7 +84,7 @@ So move inside the Company-API folder and run ```docker-compose up -d``` and see
 
 ## Demo
 
-![](https://imgur.com/XexnTNp)
+![](https://imgur.com/3oewxGV)
 
 
 ## License
